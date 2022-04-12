@@ -2,10 +2,15 @@ package com.sistema.blog.service;
 
 
 import com.sistema.blog.dto.PublicacionDTO;
+import com.sistema.blog.dto.PublicacionResponse;
 import com.sistema.blog.exceptions.ResourceNotFoundException;
 import com.sistema.blog.models.Publicacion;
 import com.sistema.blog.repository.PublicacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,11 +37,24 @@ public class PublicacionServiceImpl implements PublicacionService {
 
     //Get All
     @Override
-    public List<PublicacionDTO> obtenerPublicaciones() {
+    public PublicacionResponse obtenerPublicaciones(int numeroPagina, int tamañoPagina, String ordenarPor, String sortDir) {
 
-        List<Publicacion> publicaciones = publicacionRepository.findAll();
-        return publicaciones.stream().map(publicacion -> mapearDTO(publicacion)).collect(Collectors.toList());
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordenarPor).ascending():Sort.by(ordenarPor).descending();
+        Pageable pageable = PageRequest.of(numeroPagina, tamañoPagina, sort);
+        Page<Publicacion> publicaciones = publicacionRepository.findAll(pageable);
 
+        List<Publicacion> listaPublicaciones = publicaciones.getContent();
+        List<PublicacionDTO> contenido = listaPublicaciones.stream().map(publicacion -> mapearDTO(publicacion)).collect(Collectors.toList());
+
+        PublicacionResponse publicacionResponse = new PublicacionResponse();
+        publicacionResponse.setContenido(contenido);
+        publicacionResponse.setNumeroPagina(publicaciones.getNumber());
+        publicacionResponse.setMedidaPagina(publicaciones.getSize());
+        publicacionResponse.setTotalElementos(publicaciones.getTotalElements());
+        publicacionResponse.setTotalPaginas(publicaciones.getTotalPages());
+        publicacionResponse.setUltima(publicaciones.isLast());
+
+        return publicacionResponse;
     }
 
     //Get by ID

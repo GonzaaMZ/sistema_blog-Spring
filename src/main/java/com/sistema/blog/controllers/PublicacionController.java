@@ -1,13 +1,14 @@
 package com.sistema.blog.controllers;
 
 import com.sistema.blog.dto.PublicacionDTO;
+import com.sistema.blog.dto.PublicacionResponse;
 import com.sistema.blog.service.PublicacionService;
+import com.sistema.blog.utils.AppConstantes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/publicaciones")
@@ -16,15 +17,13 @@ public class PublicacionController {
     @Autowired
     private PublicacionService publicacionService;
 
-    @PostMapping
-    public ResponseEntity<PublicacionDTO> guardarPublicacion(@RequestBody PublicacionDTO publicacionDTO){
-
-        return new ResponseEntity<PublicacionDTO>(publicacionService.crearPublicacion(publicacionDTO), HttpStatus.CREATED);
-    }
-
     @GetMapping
-    public List<PublicacionDTO> listarPublicaciones(){
-        return publicacionService.obtenerPublicaciones();
+    public PublicacionResponse listarPublicaciones(@RequestParam(value = "pageNo", defaultValue = AppConstantes.NUMERO_DE_PAGINA_POR_DEFECTO, required = false) int numeroPagina,
+                                                   @RequestParam(value = "pageSize", defaultValue = AppConstantes.MEDIDA_DE_PAGINA_POR_DEFECTO, required = false) int tamañoPagina,
+                                                   @RequestParam(value = "sortBy", defaultValue = AppConstantes.ORDENAR_POR_DEFECTO, required = false) String ordenarPor,
+                                                   @RequestParam(value = "sortDIR", defaultValue = AppConstantes.ORDENAR_DIRECCION_POR_DEFECTO, required = false) String sortDir ){
+
+        return publicacionService.obtenerPublicaciones(numeroPagina, tamañoPagina, ordenarPor, sortDir);
     }
 
     @GetMapping("/{id}")
@@ -32,6 +31,14 @@ public class PublicacionController {
 
         return ResponseEntity.ok(publicacionService.obtenerPublicacionByID(id));
     }
+
+    @PostMapping
+    public ResponseEntity<PublicacionDTO> guardarPublicacion(@RequestBody PublicacionDTO publicacionDTO){
+
+        return new ResponseEntity<PublicacionDTO>(publicacionService.crearPublicacion(publicacionDTO), HttpStatus.CREATED);
+    }
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<PublicacionDTO> actualizarPublicacion(@RequestBody PublicacionDTO publicacionDTO, @PathVariable(name = "id") long id){
