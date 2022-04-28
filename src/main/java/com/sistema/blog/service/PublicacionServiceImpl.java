@@ -6,6 +6,7 @@ import com.sistema.blog.dto.PublicacionResponse;
 import com.sistema.blog.exceptions.ResourceNotFoundException;
 import com.sistema.blog.models.Publicacion;
 import com.sistema.blog.repository.PublicacionRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class PublicacionServiceImpl implements PublicacionService {
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private PublicacionRepository publicacionRepository;
@@ -92,12 +96,7 @@ public class PublicacionServiceImpl implements PublicacionService {
     //Convierte entidad a DTO
     private PublicacionDTO mapearDTO(Publicacion publicacion){
 
-        PublicacionDTO publicacionDTO = new PublicacionDTO();
-
-        publicacionDTO.setId(publicacion.getId());
-        publicacionDTO.setTitulo(publicacion.getTitulo());
-        publicacionDTO.setDescripcion(publicacion.getDescripcion());
-        publicacionDTO.setContenido(publicacion.getContenido());
+        PublicacionDTO  publicacionDTO = modelMapper.map(publicacion, PublicacionDTO.class);
 
         return publicacionDTO;
 
@@ -108,13 +107,9 @@ public class PublicacionServiceImpl implements PublicacionService {
     //Convierte DTO a entidad
     private Publicacion mapearEntidad(PublicacionDTO publicacionDTO){
 
-        Publicacion publicacion = new Publicacion();
-
-        publicacion.setTitulo(publicacionDTO.getTitulo());
-        publicacion.setDescripcion(publicacionDTO.getDescripcion());
-        publicacion.setContenido(publicacionDTO.getContenido());
-
+        Publicacion publicacion = modelMapper.map(publicacionDTO, Publicacion.class);
         return publicacion;
+
 
     }
 }
